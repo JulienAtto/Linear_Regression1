@@ -68,9 +68,6 @@ $$\theta=\begin{pmatrix}
 
 For speed = 21 mph (33.8 km/h), we predict a stopping distance of  **65** feet (**19.81** m).
 
-\
-&nbsp;
-
 * **Predict stopping distance for a  speed of 30 mph**:
 
 For speed = 30 mph (48.28 km/h), we predict a stopping distance of  **100.39** feet (**30.6** m).
