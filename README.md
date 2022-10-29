@@ -5,7 +5,7 @@
 
 
 Simple linear regression is a statistical method for finding a linear relationship between an explanatory variable $X$ and a variable to be explained $y$:
-\[y= \theta_0 + \theta_1 X.\]
+$$y= \theta_0 + \theta_1 X.$$
 
 # Data preparation and visualisation
 
@@ -52,7 +52,10 @@ The data **cars** in R package **datasets** give the speed of cars and the dista
 If we choose $\alpha=0.01$, then we have:
 
 
-\[\theta=\begin{pmatrix} -17.5790872\\3.9324077 \end{pmatrix}\]
+$$\theta=\begin{pmatrix}
+-17.5790872\\
+3.9324077 
+\end{pmatrix}$$
 
 ## Plotting the linear fit
 
@@ -63,21 +66,18 @@ If we choose $\alpha=0.01$, then we have:
 ## Predictions
 * **Predict stopping distance for a speed of 21 mph**:
 
-
-$\qquad\quad$For speed = 21 mph (33.8 km/h), we predict a stopping distance of  **65** feet (**19.81** m).
+For speed = 21 mph (33.8 km/h), we predict a stopping distance of  **65** feet (**19.81** m).
 
 \
 &nbsp;
 
 * **Predict stopping distance for a  speed of 30 mph**:
 
-
-
-$\qquad\quad$For speed = 30 mph (48.28 km/h), we predict a stopping distance of  **100.39** feet (**30.6** m).
+For speed = 30 mph (48.28 km/h), we predict a stopping distance of  **100.39** feet (**30.6** m).
 
 # Simple Linear Regression using lm() function of R (Normal equation)
 
-\[\theta=(X^TX)^{-1}X^Ty.\]
+$$\theta=(X^TX)^{-1}X^Ty.$$
 
 
 ```
@@ -119,11 +119,8 @@ We can see that the values of the fitted parameters are $\hat{\theta_0}=-17.579$
 ## Predictions
 * **Predict stopping distance for a speed of 21 mph**:
 
-
-$\qquad\quad$For speed = 21 mph (33.8 km/h), we predict a stopping distance of  **65** feet (**19.81** m).
+For speed = 21 mph (33.8 km/h), we predict a stopping distance of  **65** feet (**19.81** m).
 
 * **Predict stopping distance for a speed of 30 mph**:
 
-
-
-$\qquad\quad$For speed = 30 mph (48.28 km/h), we predict a stopping distance of  **100.39** feet (**30.6** m).
+For speed = 30 mph (48.28 km/h), we predict a stopping distance of  **100.39** feet (**30.6** m).
