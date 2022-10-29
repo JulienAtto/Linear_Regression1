@@ -5,13 +5,24 @@ output:
   html_document:
     code_folding: hide
     keep_md: true
+    toc: true 
+    toc_depth: 2 
+    toc_float: true 
+    number_sections: true  
+    theme: united
+    highlight: espresso
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r,message=FALSE,warning=F}
+
+```{r,echo=FALSE}
+rm(list=ls())  #cleaning my  environment
+
+```
+```{r load_libraries,message=FALSE,warning=F}
 #loading libraries to use
 library(dplyr)
 library(datasets) #for cars data
@@ -21,8 +32,8 @@ library(ggplot2)
 Simple linear regression is a statistical method for finding a linear relationship between an explanatory variable $X$ and a variable to be explained $y$:
 \[y= \theta_0 + \theta_1 X.\]
 
-# I. Data preparation and visualisation
-```{r}
+# Data preparation and visualisation
+```{r load_data}
 #Loading car data
 
 data(cars)
@@ -31,16 +42,16 @@ data(cars)
 
 The data **cars** in R package **datasets** give the speed of cars and the distances taken to stop, and  were recorded in the 1920s.
 
-## 1. Visualization of ten rows chosen randomly among the 50 observations
-```{r}
+##  Visualization of 10 rows chosen randomly among the 50 observations
+```{r view_data}
 set.seed(1234)
 cars[sample(1:50,10),]
 ```
 
 
-## 2. Graph
-```{r}
-#% Plot Data
+## Graph
+```{r graph}
+# Plot Data
 plt<-cars%>%
   ggplot(aes(x = speed, y = dist)) +
   geom_point(colour="red") +
@@ -48,14 +59,12 @@ plt<-cars%>%
   ylab("Stopping distance (feet)") +
   ggtitle("Speed and Stopping Distances of Cars")
 
-
 plt
-
 ```
 
-# II. Linear regresson using Gradient Descent
-## 1. Computation of the parameters
-```{r}
+# Linear regresson using Gradient Descent
+## Computation of the parameters
+```{r GD_and_plots}
 #X and y
 X<-cars$speed
 y=cars$dist
@@ -63,37 +72,39 @@ y=cars$dist
 # initializing fitting parameters
 theta = cbind(numeric(2)) 
 
-# choosing number of iterations
-nb_iter = 10000
-
 #loading  some functions... 
-source("functions.R")
+source("myfunctions.R")
 
 ##############################################################
-  #Ploting cost as function of number of iterations for some values of the learning rate.
-  # and choose theta related to the better learning rate. 
-  #Here,it seems that good values of alpha are between 0.0075 and 0.007.
-  ALPHA<-c(0.0075,0.0074,0.0073,0.0072)
+  # Running Gradient Descent and plotting cost as function of number of iterations for some values of the learning rate.
+
+  ALPHA<-c(0.3,0.1,0.03,0.01)
   COL<-c("red","blue","green","yellow")
+  nb_iter<-NULL #initialiation of vector containing number of iterations for each value of alpha
   out<-list()
+  Cost_by_iter<-list()
 
   for(i in 1:length(ALPHA)){
-    #% Initializing  theta and running Gradient Descent 
+    # Initializing  theta and running Gradient Descent 
     theta = matrix(0,2)
-    Grad_Desc<- Grad_Desc_fct(X, y, theta, alpha = ALPHA[i], nb_iter)
+    Grad_Desc<- Grad_Desc_fct(X, y, theta, alpha = ALPHA[i], max_iter=10000)
     theta<-Grad_Desc$theta
-    Cost_by_iter<-Grad_Desc$Cost_by_iter
+    Cost_by_iter[[i]]<-Grad_Desc$Cost_by_iter
+    nb_iter=append(nb_iter,Grad_Desc$nb_iter)
     out[[i]]<-theta
-    #% Plot the convergence graph for different values of alpha
-    curr_i=i
-    if(curr_i==1){
-      plot(1:nrow(Cost_by_iter), Cost_by_iter, type="l",lwd=2,xlab='Number of iterations',ylab='Cost',col=COL[1],
-           main="Convergence of gradient descent for a given learning rate",xlim = c(0,400))
-    }else{
-      lines(1:nrow(Cost_by_iter), Cost_by_iter, type="l",lwd=2,col=COL[i])
+    } # end of for(i in 1:length(ALPHA))
+  
+    # Plot the convergence graph for different values of alpha
+      plot(1:nrow(Cost_by_iter[[1]]), Cost_by_iter[[1]], type="l",lwd=2,xlab='Number of iterations',ylab='Cost',col=COL[1],
+           main=expression(paste("Convergence of Gradient Descent for a given learning rate ",alpha,".")),xlim = c(0,min(max(nb_iter),400)))
+      
+    for(i in 2:length(ALPHA)){
+      lines(1:nrow(Cost_by_iter[[i]]), Cost_by_iter[[i]], type="l",lwd=2,col=COL[i])
     }
-  }
-  legend("topright", legend = paste("alpha=",ALPHA), 
+  
+  
+  legend("topright", 
+         legend =sapply(ALPHA, function(.) as.expression(bquote(alpha==.(.)))),
          lwd = 2, cex = 1.2, col = COL, lty = rep(1,4))
 ```
 
@@ -103,42 +114,45 @@ names(out)<-paste(ALPHA)
 
 ```
 
-If we choose $\alpha=0.0075$, then we have:
+If we choose $\alpha=0.01$, then we have:
 ```{r,echo=FALSE}
-theta<-out$`0.0075`
+theta<-out$`0.01`
 ```
 
 \[\theta=\begin{pmatrix} `r theta[1]`\\`r theta[2]` \end{pmatrix}\]
 
-## 2. Plotting the linear fit
-```{r}
+## Plotting the linear fit
+```{r plot_fit}
 #Plot the linear fit
 
 plt+geom_abline(intercept = theta[1], slope = theta[2], color="blue", 
-               size=1.5,)
+               size=1.5)
 ```
 
-## 3. Predictions
-### a. Predict stoping distance for a speed of 21 mph.
-```{r}
+## Predictions
+* **Predict stopping distance for a speed of 21 mph**:
+```{r pred1}
 dist_for_21 = c(c(1, 21)%*%theta)
 ```
 
-For speed = 21 mph (`r round(1.609344*21,2)` km/h), we predict a stopping distance of  **`r round( dist_for_21,2)`** feet (**`r round(dist_for_21*0.3048,2)`** m).
+$\qquad\quad$For speed = 21 mph (`r round(1.609344*21,2)` km/h), we predict a stopping distance of  **`r round( dist_for_21,2)`** feet (**`r round(dist_for_21*0.3048,2)`** m).
 
-### b, Predict stoping distance for a  speed of 30 mph.
-```{r}
+\
+&nbsp;
+
+* **Predict stopping distance for a  speed of 30 mph**:
+```{r pred2}
 dist_for_30 =c( c(1, 30)%*%theta)
 
 ```
 
-For speed = 30 mph (`r round(1.609344*30,2)` km/h), we predict a stopping distance of  **`r round(dist_for_30,2)`** feet (**`r round(dist_for_30*0.3048,2)`** m).
+$\qquad\quad$For speed = 30 mph (`r round(1.609344*30,2)` km/h), we predict a stopping distance of  **`r round(dist_for_30,2)`** feet (**`r round(dist_for_30*0.3048,2)`** m).
 
-# III. Simple Linear Regression using lm() function of R (Normal equation)
+# Simple Linear Regression using lm() function of R (Normal equation)
 
 \[\theta=(X^TX)^{-1}X^Ty.\]
 
-```{r}
+```{r lm_model}
 model_lm<-lm(dist~speed,data = cars)
 
 model_lm
@@ -146,24 +160,24 @@ model_lm
 
 We can see that the values of the fitted parameters are $\hat{\theta_0}=`r round(model_lm[['coefficients']][1],3)`$ and $\hat{\theta_1}=`r round(model_lm[['coefficients']][2],3)`$.
 
-## 1. Summary of the model
-```{r}
+## Summary of the model
+```{r lm_summary}
 summary(model_lm)
 ```
 
 
-## 2. Predictions
-### a. Predict stoping distance for a speed of 21 mph.
-```{r}
+## Predictions
+* **Predict stopping distance for a speed of 21 mph**:
+```{r pred1bis}
 dist_for_21_ =predict.lm(model_lm,data.frame(speed=21))
 ```
 
-For speed = 21 mph (`r round(1.609344*21,2)` km/h), we predict a stopping distance of  **`r round(dist_for_21_,2)`** feet (**`r round(dist_for_21_*0.3048,2)`** m).
+$\qquad\quad$For speed = 21 mph (`r round(1.609344*21,2)` km/h), we predict a stopping distance of  **`r round(dist_for_21_,2)`** feet (**`r round(dist_for_21_*0.3048,2)`** m).
 
-### a. Predict stoping distance for a speed of 30 mph.
-```{r}
+* **Predict stopping distance for a speed of 30 mph**:
+```{r pred2bis}
 dist_for_30_ =predict.lm(model_lm,data.frame(speed=30))
 
 ```
 
-For speed = 30 mph (`r round(1.609344*30,2)` km/h), we predict a stopping distance of  **`r round(dist_for_30_,2)`** feet (**`r round(dist_for_30_*0.3048,2)`** m).
+$\qquad\quad$For speed = 30 mph (`r round(1.609344*30,2)` km/h), we predict a stopping distance of  **`r round(dist_for_30_,2)`** feet (**`r round(dist_for_30_*0.3048,2)`** m).
